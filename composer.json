@@ -32,7 +32,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "JeromeErasmus\\Laramyob\\Tests\\": "tests"
+            "Creativecurtis\\Laramyob\\Tests\\": "tests"
         }
     },
     "scripts": {
@@ -46,10 +46,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "JeromeErasmus\\Laramyob\\LaramyobServiceProvider"
+                "Creativecurtis\\Laramyob\\LaramyobServiceProvider"
             ],
             "aliases": {
-                "Laramyob": "JeromeErasmus\\Laramyob\\LaramyobFacade"
+                "Laramyob": "Creativecurtis\\Laramyob\\LaramyobFacade"
             }
         }
     }
