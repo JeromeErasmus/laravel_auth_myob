@@ -27,7 +27,7 @@
     },
     "autoload": {
         "psr-4": {
-            "JeromeErasmus\\Laramyob\\": "src"
+            "Creativecurtis\\Laramyob\\": "src"
         }
     },
     "autoload-dev": {
