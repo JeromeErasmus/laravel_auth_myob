@@ -1,0 +1,56 @@
+{
+    "name": "jeromeerasmus/laravel_auth_myob",
+    "description": "Authentication wrapper for MYOB Account Right v2",
+    "keywords": [
+        "jerome erasmus",
+        "laravel_auth_myob"
+    ],
+    "homepage": "https://github.com/jeromeerasmus/laravel_auth_myob",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Jerome Erasmus",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.1",
+        "illuminate/support": "5.8.*",
+        "illuminate/database": "5.8.*",
+        "nesbot/carbon": "^1.26.3",
+        "guzzlehttp/guzzle": "~6.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "3.7.*",
+        "phpunit/phpunit": "^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "JeromeErasmus\\Laramyob\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "JeromeErasmus\\Laramyob\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "JeromeErasmus\\Laramyob\\LaramyobServiceProvider"
+            ],
+            "aliases": {
+                "Laramyob": "JeromeErasmus\\Laramyob\\LaramyobFacade"
+            }
+        }
+    }
+}
