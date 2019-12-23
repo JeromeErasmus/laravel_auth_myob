@@ -50,13 +50,7 @@ class MyobRequest {
      */
     public function sendPostRequest($endpoint, $data) 
     {
-        //For refreshing token we can't encode the form
-        //And we also have to tell MYOB to return the created object
-        $params = $data['form_params'] ?? json_encode($data);
-        return $this->getHttpClient()->post($endpoint.'?returnBody=true', [
-            'headers' => empty($this->httpConfig) ? $data['headers'] : $this->httpConfig,
-            'body'    => $params,
-        ]);
+        return $this->getHttpClient()->request('POST', $endpoint, $data);
     }
 
     /**

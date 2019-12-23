@@ -4,7 +4,6 @@ namespace Creativecurtis\Laramyob;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\App;
-use Creativecurtis\Laramyob\Models\Remote\Myob;
 use Creativecurtis\Laramyob\Request\MyobRequest;
 use Creativecurtis\Laramyob\Authentication\MyobAuthenticate;
 use Creativecurtis\Laramyob\Models\Configuration\MyobConfiguration;
@@ -44,19 +43,6 @@ class Laramyob
     }
 
     /**
-     * Take a model that extends the base model.
-     * And attempt to persist to the database
-     *
-     * @return MyobConfiguration || bool,
-     */
-    public function save($model) 
-    {
-        if($this->preflight()) {
-            return $model->post();
-        }
-    }
-
-    /**
      * Send a raw GET request
      *
      * @return MyobConfiguration || bool,
@@ -64,8 +50,10 @@ class Laramyob
     public function rawGet($endpoint)
     {        
         if($this->preflight()) {
-            $myob = new Myob($endpoint, []);
-            return  $myob->get();
+            $response = $this->myobRequest
+                             ->sendGetRequest(MyobConfiguration::first()->company_file_uri.$endpoint);
+
+            return json_decode($response->getBody()->getContents(), true);
         }
     }
 
@@ -77,8 +65,10 @@ class Laramyob
     public function rawPost($endpoint, $data)
     {
         if($this->preflight()) {
-            $myob = new Myob($endpoint, $data);
-            return $myob->post();
+            $response = $this->myobRequest
+                             ->sendPostRequest(MyobConfiguration::first()->company_file_uri.$endpoint, $data);
+
+            return json_decode($response->getBody()->getContents(), true);
         }
     }
 
