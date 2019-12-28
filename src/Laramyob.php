@@ -6,17 +6,19 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\App;
 use Creativecurtis\Laramyob\Request\MyobRequest;
 use Creativecurtis\Laramyob\Authentication\MyobAuthenticate;
-use Creativecurtis\Laramyob\Models\Configuration\MyobConfiguration;
+use Creativecurtis\Laramyob\Models\Configuration\MyobConfig;
 
 class Laramyob
 {
     public $authenticate; 
     public $myobRequest;
+    public $myobConfig;
 
-    public function __construct() 
+    public function __construct(MyobConfig $myobConfig)
     {
         $this->myobRequest = new MyobRequest;
         $this->authenticate = new MyobAuthenticate($this->myobRequest);
+        $this->myobConfig = $myobConfig;
     }
     
     /**
@@ -30,57 +32,44 @@ class Laramyob
     }
 
     /**
+     * Gets the Refresh Token and updates the config
+     *
+     * @return array || bool
+     */
+    public function getRefreshToken()
+    {
+        $result = $this->authenticate->getRefreshToken($this->myobConfig->refresh_token);
+
+        if(!$result) {
+            return false;
+        } else {
+            $this->myobConfig->update($result);
+            return $result;
+        }
+    }
+
+    /**
      * Take a model that extends the base model.
      * Create that model, and then load the defaults
      *
-     * @return MyobConfiguration || bool,
+     * @return bool,
      */
     public function of($model) 
     {
         if($this->preflight()) {
-            return App::make($model);
-        }
-    }
-
-    /**
-     * Send a raw GET request
-     *
-     * @return MyobConfiguration || bool,
-     */
-    public function rawGet($endpoint)
-    {        
-        if($this->preflight()) {
-            $response = $this->myobRequest
-                             ->sendGetRequest(MyobConfiguration::first()->company_file_uri.$endpoint);
-
-            return json_decode($response->getBody()->getContents(), true);
-        }
-    }
-
-    /**
-     * Send a raw POST request
-     *
-     * @return MyobConfiguration || bool,
-     */
-    public function rawPost($endpoint, $data)
-    {
-        if($this->preflight()) {
-            $response = $this->myobRequest
-                             ->sendPostRequest(MyobConfiguration::first()->company_file_uri.$endpoint, $data);
-
-            return json_decode($response->getBody()->getContents(), true);
+            return App::makeWith($model, ['myobConfiguration' => $this->myobConfig]);
         }
     }
 
     /**
      * Preflight check for any request to see if we need to refresh the token
      *
-     * @return MyobConfiguration || bool,
+     * @return MyobConfig || bool
      */
-    private function preflight() 
+    private function preflight()
     {
-        if(MyobConfiguration::first() && Carbon::now() > MyobConfiguration::first()->expires_at) {
-            return $this->authenticate->getRefreshToken();
+        if($this->myobConfig && Carbon::now() > $this->myobConfig->expires_at) {
+            return $this->getRefreshToken($this->myobConfig->refresh_token);
         } else {
             return true;
         }

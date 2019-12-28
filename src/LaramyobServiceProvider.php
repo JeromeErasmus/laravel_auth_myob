@@ -17,9 +17,9 @@ class LaramyobServiceProvider extends ServiceProvider
         // $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'laramyob');
         // $this->loadViewsFrom(__DIR__.'/../resources/views', 'laramyob');
         // $this->loadRoutesFrom(__DIR__.'/routes.php');
-        $this->publishes([
-            __DIR__.'/../database/migrations/create_myob_configurations_table.php' => database_path('migrations/'.date('Y_m_d_His', time()).'_create_myob_configurations_table.php'),
-        ], 'migrations');
+        // $this->publishes([
+        //     __DIR__.'/../database/migrations/create_myob_configurations_table.php' => database_path('migrations/'.date('Y_m_d_His', time()).'_create_myob_configurations_table.php'),
+        // ], 'migrations');
         
         if ($this->app->runningInConsole()) {
             $this->publishes([

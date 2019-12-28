@@ -4,7 +4,7 @@ namespace Creativecurtis\Laramyob\Models;
 
 use Creativecurtis\Laramyob\Request\MyobRequest;
 use Creativecurtis\Laramyob\Exceptions\MyobConfigurationException;
-use Creativecurtis\Laramyob\Models\Configuration\MyobConfiguration;
+use Creativecurtis\Laramyob\Models\Configuration\MyobConfig;
 
 abstract class BaseModel {
 
@@ -14,10 +14,9 @@ abstract class BaseModel {
     public $paginated = false;
     public $paginationStep = 400;
 
-    public function __construct() 
+    public function __construct(MyobConfig $myobConfiguration) 
     {
-        if(MyobConfiguration::first()) {
-            $myobConfiguration = MyobConfiguration::first();
+        if($myobConfiguration) {
             $this->myobRequest = new MyobRequest([
                 'Authorization' => 'Bearer '.$myobConfiguration->access_token,
                 'x-myobapi-version' => 'v2',
@@ -26,7 +25,7 @@ abstract class BaseModel {
                 'Accept' => 'application/json',
                 'Content-Type' =>'application/json',
             ]);
-            $this->baseurl = MyobConfiguration::first()->company_file_uri;
+            $this->baseurl = $myobConfiguration->company_file_uri;
         } else {
             throw MyobConfigurationException::myobConfigurationNotFoundException();
         }

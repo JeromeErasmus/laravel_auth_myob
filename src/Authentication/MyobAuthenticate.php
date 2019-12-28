@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Creativecurtis\Laramyob\Request\MyobRequest;
-use Creativecurtis\Laramyob\Models\Configuration\MyobConfiguration;
 
 class MyobAuthenticate {
 
@@ -30,9 +29,9 @@ class MyobAuthenticate {
      *
      * @return  redirect
      */
-    public function getCode() 
+    public function getCode()
     {
-        return redirect('https://secure.myob.com/oauth2/account/authorize?client_id='.$this->client_id.'&redirect_uri='.urlencode($this->redirect_uri).'&response_type=code&scope='.$this->scope_type);
+        return 'https://secure.myob.com/oauth2/account/authorize?client_id='.$this->client_id.'&redirect_uri='.urlencode($this->redirect_uri).'&response_type=code&scope='.$this->scope_type;
     }
 
     /**
@@ -41,7 +40,7 @@ class MyobAuthenticate {
      * @param Illuminate\Http\Request $reqest
      * @param String $grant_type 
      * @param String $refresh_token
-     * @return MyobConfiguration
+     * @return Response
      */
     public function getToken(Request $request = null, $grant_type = 'authorization_code', $refresh_token = null)
     {
@@ -59,43 +58,33 @@ class MyobAuthenticate {
                 'client_secret' => $this->client_secret
             ],
         ];
-
+        
         $response = $this->myobRequest->sendPostRequest('https://secure.myob.com/oauth2/v1/authorize', $http_attributes);
+        
+        $data = json_decode($response->getBody()->getContents(), true);
+        
+        if(!$data) {
+            return false;
+        }
 
-        $response = json_decode($response->getBody()->getContents(), true);
-
-        $myobConfiguration = MyobConfiguration::updateOrCreate(['id' => 1], [
-            'access_token'  => $response['access_token'],
-            'refresh_token' => $response['refresh_token'],
-            'scope'         => $response['scope'],
-            'expires_at'    => Carbon::now()->addSeconds($response['expires_in']),
-        ]);
-            
-        return $myobConfiguration;
+        return [
+            'access_token'  => $data['access_token'],
+            'refresh_token' => $data['refresh_token'],
+            'scope'         => $data['scope'],
+            'expires_at'    => Carbon::now()->addSeconds($data['expires_in']),
+        ];
     }
 
     /**
      * Refresh the token for the MYOB bearer
      *
-     * @return MyobConfiguration
+     * @param String $refreshToken 
+     * @return Response
      */
-    public function getRefreshToken() 
+    public function getRefreshToken(String $refreshToken)
     {
-        return $this->getToken(null, 'refresh_token', MyobConfiguration::first()->refresh_token);
-    }
-
-    /**
-     * Save the admin credentials and test the connection
-     *
-     * @return bool
-     */
-    public function saveCompanyFileCredentials($data) 
-    {
-        return MyobConfiguration::first()->updateOrCreate(['id' => 1], [
-            'company_file_token' => base64_encode($data['username'].':'.$data['password']),
-            'company_file_guid'  => $data['company_file_guid'],
-            'company_file_name'  => $data['company_file_name'],
-            'company_file_uri'   => stripslashes($data['company_file_uri']),
-        ]);
+        if (!$refreshToken)
+            return false;
+        return $this->getToken(null, 'refresh_token', $refreshToken);
     }
 }
